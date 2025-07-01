@@ -1,11 +1,19 @@
 "use client";
 import React, { useState } from "react";
 
-const initialCategorias = [];
+const initialDirectorio = [
+  // Ejemplo de registro
+  // { ID_Directorio: 1, ID_Sucursal: 1, razonSocial: "Empresa S.A.", ruc: "12345678901" }
+];
 
-export default function CategoriasCRUD() {
-  const [categorias, setCategorias] = useState(initialCategorias);
-  const [form, setForm] = useState({ nombre: "" });
+export default function DirectorioCRUD() {
+  const [directorio, setDirectorio] = useState(initialDirectorio);
+  const [form, setForm] = useState({
+    ID_Directorio: "",
+    ID_Sucursal: "",
+    razonSocial: "",
+    ruc: ""
+  });
   const [editIndex, setEditIndex] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -16,55 +24,54 @@ export default function CategoriasCRUD() {
   const handleAdd = (e) => {
     e.preventDefault();
     if (editIndex !== null) {
-      const updated = [...categorias];
+      const updated = [...directorio];
       updated[editIndex] = form;
-      setCategorias(updated);
+      setDirectorio(updated);
       setEditIndex(null);
     } else {
-      setCategorias([...categorias, form]);
+      setDirectorio([...directorio, form]);
     }
-    setForm({ nombre: "" });
+    setForm({ ID_Directorio: "", ID_Sucursal: "", razonSocial: "", ruc: "" });
     setModalOpen(false);
   };
 
   const handleEdit = (idx) => {
-    setForm(categorias[idx]);
+    setForm(directorio[idx]);
     setEditIndex(idx);
     setModalOpen(true);
   };
 
   const handleDelete = (idx) => {
-    setCategorias(categorias.filter((_, i) => i !== idx));
+    setDirectorio(directorio.filter((_, i) => i !== idx));
     if (editIndex === idx) {
-      setForm({ nombre: "" });
+      setForm({ ID_Directorio: "", ID_Sucursal: "", razonSocial: "", ruc: "" });
       setEditIndex(null);
     }
   };
 
   const handleOpenModal = () => {
-    setForm({ nombre: "" });
+    setForm({ ID_Directorio: "", ID_Sucursal: "", razonSocial: "", ruc: "" });
     setEditIndex(null);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
-    setForm({ nombre: "" });
+    setForm({ ID_Directorio: "", ID_Sucursal: "", razonSocial: "", ruc: "" });
     setEditIndex(null);
   };
 
   return (
     <div className="bg-white rounded-xl shadow p-4 md:p-6 mb-8 overflow-x-auto">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">Categorías</h2>
+        <h2 className="text-2xl font-bold">Directorio</h2>
         <button
           className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 transition"
           onClick={handleOpenModal}
         >
-          Agregar Categoría
+          Agregar Registro
         </button>
       </div>
-
       {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-sm bg-black/10">
@@ -77,15 +84,39 @@ export default function CategoriasCRUD() {
               ×
             </button>
             <h3 className="text-xl font-semibold mb-4">
-              {editIndex !== null ? "Editar Categoría" : "Agregar Categoría"}
+              {editIndex !== null ? "Editar Registro" : "Agregar Registro"}
             </h3>
             <form className="flex flex-col gap-4" onSubmit={handleAdd}>
               <input
-                name="nombre"
-                value={form.nombre}
+                name="ID_Directorio"
+                value={form.ID_Directorio}
                 onChange={handleChange}
-                placeholder="Nombre de la categoría"
-                className="border rounded px-3 py-2 flex-1"
+                placeholder="ID Directorio"
+                className="border rounded px-3 py-2"
+                required
+              />
+              <input
+                name="ID_Sucursal"
+                value={form.ID_Sucursal}
+                onChange={handleChange}
+                placeholder="ID Sucursal"
+                className="border rounded px-3 py-2"
+                required
+              />
+              <input
+                name="razonSocial"
+                value={form.razonSocial}
+                onChange={handleChange}
+                placeholder="Razón Social"
+                className="border rounded px-3 py-2"
+                required
+              />
+              <input
+                name="ruc"
+                value={form.ruc}
+                onChange={handleChange}
+                placeholder="RUC"
+                className="border rounded px-3 py-2"
                 required
               />
               <button type="submit" className="bg-blue-600 text-white rounded px-4 py-2">
@@ -95,18 +126,23 @@ export default function CategoriasCRUD() {
           </div>
         </div>
       )}
-
       <table className="min-w-full text-sm overflow-x-auto block md:table">
         <thead>
           <tr className="bg-slate-100">
-            <th className="px-4 py-2 text-left">Nombre</th>
+            <th className="px-4 py-2 text-left">ID Directorio</th>
+            <th className="px-4 py-2 text-left">ID Sucursal</th>
+            <th className="px-4 py-2 text-left">Razón Social</th>
+            <th className="px-4 py-2 text-left">RUC</th>
             <th className="px-4 py-2 text-left">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {categorias.map((cat, idx) => (
+          {directorio.map((item, idx) => (
             <tr key={idx} className="border-b">
-              <td className="px-4 py-2">{cat.nombre}</td>
+              <td className="px-4 py-2">{item.ID_Directorio}</td>
+              <td className="px-4 py-2">{item.ID_Sucursal}</td>
+              <td className="px-4 py-2">{item.razonSocial}</td>
+              <td className="px-4 py-2">{item.ruc}</td>
               <td className="px-4 py-2">
                 <div className="flex flex-col gap-2 md:flex-row md:gap-2 w-full">
                   <button

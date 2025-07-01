@@ -7,9 +7,8 @@ const navItems = [
   { label: "Dashboard", href: "/admin", icon: "dashboard" },
   { label: "Productos", href: "/elementos/productos", icon: "inventory_2" },
   { label: "Movimientos", href: "/movimientos", icon: "swap_horiz" },
-  { label: "Usuarios", href: "/usuarios", icon: "people" },
+  { label: "Directorio", href: "/directorio", icon: "business" },
   { label: "Categorías", href: "/categorias", icon: "category" },
-  { label: "Reportes", href: "/reportes", icon: "bar_chart" },
   { label: "Mi Cuenta", href: "/cuenta", icon: "account_circle" },
   { label: "Salir", href: "/logout", icon: "logout" },
 ];
