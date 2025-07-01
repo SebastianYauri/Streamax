@@ -49,7 +49,7 @@ export default function InventarioCRUD() {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow p-6 mb-8">
+    <div className="bg-white rounded-xl shadow p-4 md:p-6 mb-8 overflow-x-auto">
       <h2 className="text-2xl font-bold mb-4">Registrar Producto</h2>
       <form className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" onSubmit={handleAdd}>
         <input
@@ -88,7 +88,7 @@ export default function InventarioCRUD() {
           {editIndex !== null ? "Actualizar" : "Agregar"}
         </button>
       </form>
-      <table className="min-w-full text-sm">
+      <table className="min-w-full text-sm overflow-x-auto block md:table">
         <thead>
           <tr className="bg-slate-100">
             <th className="px-4 py-2 text-left">Serie</th>
