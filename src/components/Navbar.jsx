@@ -49,12 +49,17 @@ export default function Navbar() {
   // Responsive: track if mobile
   const [isMobile, setIsMobile] = useState(false);
   // Update isMobile on resize
-  React.useEffect(() => {
+  useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  // Cierra los desplegables al cerrar el menú lateral en móvil
+  useEffect(() => {
+    if (!open) setDropdownOpen(null);
+  }, [open]);
 
   return (
     <>
@@ -70,7 +75,7 @@ export default function Navbar() {
       <nav
         className={`bg-blue-900 text-white flex flex-col py-6 px-4 gap-2 fixed left-0 top-0 min-h-screen shadow-lg z-20 w-60 transition-transform duration-300
         ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static md:w-60`}
-        style={{ maxWidth: "100vw" }}
+        style={{ maxWidth: "100vw", overflowY: 'auto' }}
       >
         <div className="flex items-center gap-2 mb-8 px-2">
           <img src="/logo.svg" alt="Logo" className="h-9 w-9" />

@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import InventarioProductos from "../../components/InventarioProductos";
 import KardexMovimientos from "../../components/KardexMovimientos";
+import MobileTabBar from "../../components/MobileTabBar";
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -59,6 +60,8 @@ export default function AdminPage() {
       {/* Aquí puedes renderizar children o widgets adicionales */}
       <InventarioProductos />
       <KardexMovimientos />
+      {/* Tab bar móvil */}
+      <MobileTabBar />
     </>
   );
 }

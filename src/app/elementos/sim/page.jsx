@@ -45,45 +45,49 @@ export default function SimPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-3xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Gestión de SIMs</h2>
-      <button
-        className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 mb-4"
-        onClick={() => { setModalOpen(true); setEditIndex(null); }}
-      >
-        Agregar SIM
-      </button>
-      <table className="min-w-full text-sm mb-6">
-        <thead>
-          <tr className="bg-slate-100">
-            <th className="px-4 py-2 text-left">Número</th>
-            <th className="px-4 py-2 text-left">Plan</th>
-            <th className="px-4 py-2 text-left">Estado</th>
-            <th className="px-4 py-2 text-left">Producto</th>
-            <th className="px-4 py-2 text-left">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sims.map((sim, idx) => (
-            <tr key={sim.ID_SIM} className="border-b">
-              <td className="px-4 py-2">{sim.Numero}</td>
-              <td className="px-4 py-2">{sim.Plan}</td>
-              <td className="px-4 py-2">{sim.Estado}</td>
-              <td className="px-4 py-2">{productos.find(p => p.ID_Producto === sim.ID_Producto)?.Nombre || "-"}</td>
-              <td className="px-4 py-2 flex gap-2">
-                <button
-                  className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded"
-                  onClick={() => handleEdit(idx)}
-                >Editar</button>
-                <button
-                  className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
-                  onClick={() => handleDelete(idx)}
-                >Eliminar</button>
-              </td>
+      <div className="flex justify-end mb-4">
+        <button
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2"
+          onClick={() => { setModalOpen(true); setEditIndex(null); }}
+        >
+          Agregar SIM
+        </button>
+      </div>
+      <div className="overflow-x-auto rounded-xl shadow">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="bg-slate-100">
+              <th className="px-4 py-2 text-left">Número</th>
+              <th className="px-4 py-2 text-left">Plan</th>
+              <th className="px-4 py-2 text-left">Estado</th>
+              <th className="px-4 py-2 text-left">Producto</th>
+              <th className="px-4 py-2 text-left">Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sims.map((sim, idx) => (
+              <tr key={sim.ID_SIM} className="border-b hover:bg-slate-50">
+                <td className="px-4 py-2">{sim.Numero}</td>
+                <td className="px-4 py-2">{sim.Plan}</td>
+                <td className="px-4 py-2">{sim.Estado}</td>
+                <td className="px-4 py-2">{productos.find(p => p.ID_Producto === sim.ID_Producto)?.Nombre || "-"}</td>
+                <td className="px-4 py-2 flex gap-2">
+                  <button
+                    className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded"
+                    onClick={() => handleEdit(idx)}
+                  >Editar</button>
+                  <button
+                    className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                    onClick={() => handleDelete(idx)}
+                  >Eliminar</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       {modalOpen && (
         <div className="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-sm bg-black/10">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg animate-fadeInScale relative">
