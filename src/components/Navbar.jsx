@@ -18,6 +18,14 @@ const navItems = [
       { label: "SIM", href: "/elementos/sim", icon: "sim_card" },
     ],
   },
+  {
+    label: "Kardex",
+    icon: "list_alt",
+    children: [
+      { label: "Kardex Productos", href: "/movimientos/kardex-productos", icon: "list" },
+      { label: "Kardex Accesorios", href: "/movimientos/kardex-accesorios", icon: "list" },
+    ],
+  },
   { label: "Movimientos", href: "/movimientos", icon: "swap_horiz" },
   {
     label: "Directorio",

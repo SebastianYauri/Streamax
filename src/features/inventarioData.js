@@ -1,3 +1,4 @@
+
 // TODO: Reemplazar estos datos mock por consultas a la API cuando el backend esté disponible
 // Modelo de Producto según tu base de datos
 export const productos = [
@@ -22,4 +23,16 @@ export const kardex = [
     ID_Directorio: 1,
   },
   // Agrega más movimientos aquí
+];
+
+// Mock de accesorios
+export const accesorios = [
+  { ID_Accesorio: 1, Nombre: 'Cable USB', ID_Categoria: 1, Descripcion: 'Cable de carga', Cantidad: 10 },
+  { ID_Accesorio: 2, Nombre: 'Cargador', ID_Categoria: 1, Descripcion: 'Cargador rápido', Cantidad: 5 },
+];
+
+// Mock de kardex de accesorios
+export const kardexAccesorios = [
+  { ID_Kardex: 1, ID_Accesorio: 1, Cantidad: 5, Fecha: '2025-07-01', ID_Usuario: 1, ID_Directorio: 1 },
+  { ID_Kardex: 2, ID_Accesorio: 2, Cantidad: 2, Fecha: '2025-07-02', ID_Usuario: 2, ID_Directorio: 1 },
 ];

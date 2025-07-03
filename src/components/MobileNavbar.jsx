@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: "dashboard" },
   { label: "Productos", href: "/elementos/productos", icon: "inventory_2" },
+  { label: "Kardex Productos", href: "/movimientos/kardex-productos", icon: "list" },
+  { label: "Kardex Accesorios", href: "/movimientos/kardex-accesorios", icon: "list" },
   { label: "Movimientos", href: "/movimientos", icon: "swap_horiz" },
   { label: "Directorio", href: "/directorio", icon: "business" },
   { label: "Categorías", href: "/categorias", icon: "category" },
