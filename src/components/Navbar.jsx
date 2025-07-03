@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: "dashboard" },
@@ -10,7 +11,7 @@ const navItems = [
   { label: "Directorio", href: "/directorio", icon: "business" },
   { label: "Categorías", href: "/categorias", icon: "category" },
   { label: "Mi Cuenta", href: "/cuenta", icon: "account_circle" },
-  { label: "Salir", href: "/logout", icon: "logout" },
+  // El botón de salir se maneja aparte
 ];
 
 export default function Navbar() {
@@ -23,6 +24,7 @@ export default function Navbar() {
     pathname = require("next/navigation").usePathname?.() || "";
   } catch {}
   const [open, setOpen] = useState(false);
+  const { logout } = useAuth();
   return (
     <>
       {/* Botón hamburguesa solo visible en móvil */}
@@ -56,6 +58,15 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
+          <li>
+            <button
+              onClick={logout}
+              className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors duration-150 text-base font-medium hover:bg-blue-800 focus:bg-blue-800 focus:outline-none w-full text-left"
+            >
+              <span className="material-icons text-lg opacity-80">logout</span>
+              Salir
+            </button>
+          </li>
         </ul>
         <div className="mt-8 text-xs text-blue-200 text-center opacity-70">
           © 2025 Tu Empresa

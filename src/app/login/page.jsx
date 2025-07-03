@@ -1,6 +1,36 @@
+"use client";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 
 export default function LoginPage() {
+  const { login, user } = useAuth();
+  const router = useRouter();
+  const [form, setForm] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      router.replace("/admin");
+    }
+  }, [user, router]);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (login(form.username, form.password)) {
+      // No redirigir aquí, el useEffect lo hará
+    } else {
+      setError("Usuario o contraseña incorrectos");
+    }
+  };
+
+  if (user) return null;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-400 px-2">
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg flex flex-col md:flex-row overflow-hidden">
@@ -18,7 +48,7 @@ export default function LoginPage() {
             />
             <span className="text-blue-900 text-2xl font-bold">Login</span>
           </div>
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
                 className="block text-blue-700 text-sm mb-1"
@@ -31,6 +61,9 @@ export default function LoginPage() {
                 name="username"
                 type="text"
                 className="w-full px-3 py-2 bg-transparent border-b border-blue-400 text-blue-900 focus:outline-none"
+                value={form.username}
+                onChange={handleChange}
+                autoComplete="username"
               />
             </div>
             <div>
@@ -45,8 +78,12 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 className="w-full px-3 py-2 bg-transparent border-b border-blue-400 text-blue-900 focus:outline-none"
+                value={form.password}
+                onChange={handleChange}
+                autoComplete="current-password"
               />
             </div>
+            {error && <div className="text-red-600 text-sm">{error}</div>}
             <button
               type="submit"
               className="w-full mt-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition"

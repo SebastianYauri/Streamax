@@ -1,20 +1,22 @@
 "use client";
 import React, { useState } from "react";
-import { useKardex } from "../hooks/useKardex";
-import { useProductos } from "../hooks/useProductos";
 
-const tiposMovimiento = ["Ingreso", "Salida"];
+// TODO: Reemplazar initialDirectorio y lógica local por datos y operaciones de la API
+const initialDirectorio = [
+  // Ejemplo de registro
+  // { ID_Directorio: 1, ID_Sucursal: 1, razonSocial: "Empresa S.A.", ruc: "12345678901" }
+];
 
-export default function MovimientosCRUD() {
-  const { kardex, addMovimiento, updateMovimiento, deleteMovimiento } = useKardex();
-  const { productos } = useProductos();
-  const [modalOpen, setModalOpen] = useState(false);
+export default function DirectorioCRUD() {
+  const [directorio, setDirectorio] = useState(initialDirectorio);
   const [form, setForm] = useState({
-    Tipo: "Ingreso",
-    ID_Producto: productos[0]?.Serie || "",
-    ID_Directorio: ""
+    ID_Directorio: "",
+    ID_Sucursal: "",
+    razonSocial: "",
+    ruc: ""
   });
-  const [editId, setEditId] = useState(null);
+  const [editIndex, setEditIndex] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,50 +24,53 @@ export default function MovimientosCRUD() {
 
   const handleAdd = (e) => {
     e.preventDefault();
-    if (editId !== null) {
-      updateMovimiento(editId, form);
-      setEditId(null);
+    if (editIndex !== null) {
+      const updated = [...directorio];
+      updated[editIndex] = form;
+      setDirectorio(updated);
+      setEditIndex(null);
     } else {
-      addMovimiento({
-        ID_Kardex: Date.now(),
-        ...form
-      });
+      setDirectorio([...directorio, form]);
     }
-    setForm({ Tipo: "Ingreso", ID_Producto: productos[0]?.Serie || "", ID_Directorio: "" });
+    setForm({ ID_Directorio: "", ID_Sucursal: "", razonSocial: "", ruc: "" });
     setModalOpen(false);
   };
 
-  const handleEdit = (mov) => {
-    setForm({ Tipo: mov.Tipo, ID_Producto: mov.ID_Producto, ID_Directorio: mov.ID_Directorio });
-    setEditId(mov.ID_Kardex);
+  const handleEdit = (idx) => {
+    setForm(directorio[idx]);
+    setEditIndex(idx);
     setModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    deleteMovimiento(id);
+  const handleDelete = (idx) => {
+    setDirectorio(directorio.filter((_, i) => i !== idx));
+    if (editIndex === idx) {
+      setForm({ ID_Directorio: "", ID_Sucursal: "", razonSocial: "", ruc: "" });
+      setEditIndex(null);
+    }
   };
 
   const handleOpenModal = () => {
-    setForm({ Tipo: "Ingreso", ID_Producto: productos[0]?.Serie || "", ID_Directorio: "" });
-    setEditId(null);
+    setForm({ ID_Directorio: "", ID_Sucursal: "", razonSocial: "", ruc: "" });
+    setEditIndex(null);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
-    setForm({ Tipo: "Ingreso", ID_Producto: productos[0]?.Serie || "", ID_Directorio: "" });
-    setEditId(null);
+    setForm({ ID_Directorio: "", ID_Sucursal: "", razonSocial: "", ruc: "" });
+    setEditIndex(null);
   };
 
   return (
     <div className="bg-white rounded-xl shadow p-4 md:p-6 mb-8 overflow-x-auto">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">Movimientos (Kardex)</h2>
+        <h2 className="text-2xl font-bold">Directorio</h2>
         <button
           className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 transition"
           onClick={handleOpenModal}
         >
-          Agregar Movimiento
+          Agregar Registro
         </button>
       </div>
       {/* Modal */}
@@ -80,31 +85,9 @@ export default function MovimientosCRUD() {
               ×
             </button>
             <h3 className="text-xl font-semibold mb-4">
-              {editId !== null ? "Editar Movimiento" : "Agregar Movimiento"}
+              {editIndex !== null ? "Editar Registro" : "Agregar Registro"}
             </h3>
             <form className="flex flex-col gap-4" onSubmit={handleAdd}>
-              <select
-                name="Tipo"
-                value={form.Tipo}
-                onChange={handleChange}
-                className="border rounded px-3 py-2"
-                required
-              >
-                {tiposMovimiento.map((tipo) => (
-                  <option key={tipo} value={tipo}>{tipo}</option>
-                ))}
-              </select>
-              <select
-                name="ID_Producto"
-                value={form.ID_Producto}
-                onChange={handleChange}
-                className="border rounded px-3 py-2"
-                required
-              >
-                {productos.map((prod) => (
-                  <option key={prod.Serie} value={prod.Serie}>{prod.Serie}</option>
-                ))}
-              </select>
               <input
                 name="ID_Directorio"
                 value={form.ID_Directorio}
@@ -113,8 +96,32 @@ export default function MovimientosCRUD() {
                 className="border rounded px-3 py-2"
                 required
               />
+              <input
+                name="ID_Sucursal"
+                value={form.ID_Sucursal}
+                onChange={handleChange}
+                placeholder="ID Sucursal"
+                className="border rounded px-3 py-2"
+                required
+              />
+              <input
+                name="razonSocial"
+                value={form.razonSocial}
+                onChange={handleChange}
+                placeholder="Razón Social"
+                className="border rounded px-3 py-2"
+                required
+              />
+              <input
+                name="ruc"
+                value={form.ruc}
+                onChange={handleChange}
+                placeholder="RUC"
+                className="border rounded px-3 py-2"
+                required
+              />
               <button type="submit" className="bg-blue-600 text-white rounded px-4 py-2">
-                {editId !== null ? "Actualizar" : "Agregar"}
+                {editIndex !== null ? "Actualizar" : "Agregar"}
               </button>
             </form>
           </div>
@@ -123,32 +130,32 @@ export default function MovimientosCRUD() {
       <table className="min-w-full text-sm overflow-x-auto block md:table">
         <thead>
           <tr className="bg-slate-100">
-            <th className="px-4 py-2 text-left">ID Kardex</th>
-            <th className="px-4 py-2 text-left">Tipo</th>
-            <th className="px-4 py-2 text-left">Producto</th>
             <th className="px-4 py-2 text-left">ID Directorio</th>
+            <th className="px-4 py-2 text-left">ID Sucursal</th>
+            <th className="px-4 py-2 text-left">Razón Social</th>
+            <th className="px-4 py-2 text-left">RUC</th>
             <th className="px-4 py-2 text-left">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {kardex.map((mov, idx) => (
+          {directorio.map((item, idx) => (
             <tr key={idx} className="border-b">
-              <td className="px-4 py-2">{mov.ID_Kardex}</td>
-              <td className="px-4 py-2">{mov.Tipo}</td>
-              <td className="px-4 py-2">{mov.ID_Producto}</td>
-              <td className="px-4 py-2">{mov.ID_Directorio}</td>
+              <td className="px-4 py-2">{item.ID_Directorio}</td>
+              <td className="px-4 py-2">{item.ID_Sucursal}</td>
+              <td className="px-4 py-2">{item.razonSocial}</td>
+              <td className="px-4 py-2">{item.ruc}</td>
               <td className="px-4 py-2">
                 <div className="flex flex-col gap-2 md:flex-row md:gap-2 w-full">
                   <button
                     className="bg-yellow-400 text-white px-2 py-1 rounded w-full md:w-auto"
-                    onClick={() => handleEdit(mov)}
+                    onClick={() => handleEdit(idx)}
                     type="button"
                   >
                     Editar
                   </button>
                   <button
                     className="bg-red-500 text-white px-2 py-1 rounded w-full md:w-auto"
-                    onClick={() => handleDelete(mov.ID_Kardex)}
+                    onClick={() => handleDelete(idx)}
                     type="button"
                   >
                     Eliminar

@@ -1,3 +1,4 @@
+// TODO: Reemplazar estos datos mock por consultas a la API cuando el backend esté disponible
 // Modelo de Producto según tu base de datos
 export const productos = [
   // Ejemplo de producto
@@ -10,6 +11,7 @@ export const productos = [
   // Agrega más productos aquí
 ];
 
+// TODO: Reemplazar estos datos mock por consultas a la API cuando el backend esté disponible
 // Modelo de Kardex según tu base de datos
 export const kardex = [
   // Ejemplo de movimiento kardex

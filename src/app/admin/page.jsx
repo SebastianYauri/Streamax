@@ -1,10 +1,23 @@
 // Página principal de Admin (Inventario y Kardex)
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
 import InventarioProductos from "../../components/InventarioProductos";
 import KardexMovimientos from "../../components/KardexMovimientos";
 
 export default function AdminPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user) {
+      router.replace("/login");
+    }
+  }, [user, router]);
+
+  if (!user) return null;
+
   return (
     <>
       {/* Header */}

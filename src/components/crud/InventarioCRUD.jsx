@@ -1,12 +1,14 @@
 "use client";
 import React, { useState } from "react";
 
+// TODO: Reemplazar initialProductos por datos obtenidos desde la API
 // Simulación de datos iniciales (puedes reemplazar por fetch a una API o contexto)
 const initialProductos = [
   // Ejemplo: { Serie: "123", ID_Modelo: "1", ID_Categoria: "2", Estado: "Nuevo" }
 ];
 
 export default function InventarioCRUD() {
+  // TODO: Reemplazar setProductos y operaciones locales por llamadas a la API (GET, POST, PUT, DELETE)
   const [productos, setProductos] = useState(initialProductos);
   const [form, setForm] = useState({
     Serie: "",
