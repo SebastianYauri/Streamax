@@ -1,3 +1,20 @@
+// Mock de marcas
+export const marcas = [
+  { ID_Marca: 1, Nombre: 'Samsung' },
+  { ID_Marca: 2, Nombre: 'Apple' },
+];
+
+// Mock de modelos (cada uno con ID_Marca)
+export const modelos = [
+  { ID_Modelo: 1, Descripcion: 'Galaxy S21', ID_Marca: 1 },
+  { ID_Modelo: 2, Descripcion: 'iPhone 13', ID_Marca: 2 },
+];
+
+// Mock de categorías
+export const categorias = [
+  { ID_Categoria: 1, Nombre: 'Smartphone' },
+  { ID_Categoria: 2, Nombre: 'Tablet' },
+];
 
 // TODO: Reemplazar estos datos mock por consultas a la API cuando el backend esté disponible
 // Modelo de Producto según tu base de datos
