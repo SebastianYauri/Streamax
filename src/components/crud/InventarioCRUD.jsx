@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import BarcodeScanner from "../BarcodeScanner";
 
 // TODO: Reemplazar initialProductos por datos obtenidos desde la API
 // Simulación de datos iniciales (puedes reemplazar por fetch a una API o contexto)
@@ -7,7 +8,8 @@ const initialProductos = [
   // Ejemplo: { Serie: "123", ID_Modelo: "1", ID_Categoria: "2", Estado: "Nuevo" }
 ];
 
-export default function InventarioCRUD() {
+// Permite pasar un callback para setear la serie desde fuera (ej: escáner)
+export default function InventarioCRUD({ onScanSerie }) {
   // TODO: Reemplazar setProductos y operaciones locales por llamadas a la API (GET, POST, PUT, DELETE)
   const [productos, setProductos] = useState(initialProductos);
   const [form, setForm] = useState({
@@ -60,6 +62,12 @@ export default function InventarioCRUD() {
     setModalOpen(true);
   };
 
+  // Permite setear la serie desde el escáner
+  const handleScanSerie = (code) => {
+    setForm((prev) => ({ ...prev, Serie: code }));
+    if (onScanSerie) onScanSerie(code);
+  };
+
   const handleCloseModal = () => {
     setModalOpen(false);
     setForm({ Serie: "", ID_Modelo: "", ID_Categoria: "", Estado: "" });
@@ -92,6 +100,12 @@ export default function InventarioCRUD() {
             <h3 className="text-xl font-semibold mb-4">
               {editIndex !== null ? "Editar Producto" : "Agregar Producto"}
             </h3>
+            {/* Escáner integrado solo al agregar producto */}
+            {editIndex === null && (
+              <div className="mb-4">
+                <BarcodeScanner onDetected={handleScanSerie} />
+              </div>
+            )}
             <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleAdd}>
               <input
                 name="Serie"
