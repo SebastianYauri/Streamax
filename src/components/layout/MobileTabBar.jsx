@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -26,20 +26,78 @@ const navItems = [
   { label: "Categorías", href: "/categorias", icon: "category" },
 ];
 
+
 export default function MobileTabBar() {
   const pathname = usePathname();
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarRef = useRef(null);
+  const hamburgerRef = useRef(null);
 
-  // Solo mostrar en mobile, navbar azul moderno
+  // Cierra sidebar al hacer click fuera
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    function handleClickOutside(e) {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(e.target) &&
+        hamburgerRef.current &&
+        !hamburgerRef.current.contains(e.target)
+      ) {
+        setSidebarOpen(false);
+        setOpenDropdown(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [sidebarOpen]);
+
+  // Cierra sidebar al navegar
+  useEffect(() => {
+    setSidebarOpen(false);
+    setOpenDropdown(null);
+    // eslint-disable-next-line
+  }, [pathname]);
+
+  // Animación hamburguesa
+  const HamburgerButton = ({ open, onClick }) => (
+    <button
+      ref={hamburgerRef}
+      className="md:hidden fixed top-4 left-4 z-[100] flex flex-col justify-center items-center w-10 h-10 bg-blue-600 rounded-full shadow-lg focus:outline-none transition-all"
+      aria-label={open ? "Cerrar menú" : "Abrir menú"}
+      aria-expanded={open}
+      onClick={onClick}
+    >
+      <span
+        className={`block w-6 h-0.5 bg-white rounded transition-all duration-300 ${open ? "rotate-45 translate-y-2" : ""}`}
+      ></span>
+      <span
+        className={`block w-6 h-0.5 bg-white rounded transition-all duration-300 my-1 ${open ? "opacity-0" : ""}`}
+      ></span>
+      <span
+        className={`block w-6 h-0.5 bg-white rounded transition-all duration-300 ${open ? "-rotate-45 -translate-y-2" : ""}`}
+      ></span>
+    </button>
+  );
+
   return (
     <>
-      {openDropdown && (
+      <HamburgerButton open={sidebarOpen} onClick={() => setSidebarOpen((v) => !v)} />
+      {/* Overlay para cerrar sidebar */}
+      {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/20"
-          onClick={() => setOpenDropdown(null)}
+          className="fixed inset-0 z-40 bg-black/20 md:hidden"
+          onClick={() => {
+            setSidebarOpen(false);
+            setOpenDropdown(null);
+          }}
         />
       )}
-      <aside className="md:hidden fixed top-0 left-0 h-full w-[72px] bg-blue-600 rounded-r-3xl shadow-2xl z-50 flex flex-col items-center py-6 gap-2 border-r border-blue-700">
+      <aside
+        ref={sidebarRef}
+        className={`md:hidden fixed top-0 left-0 min-h-screen w-[72px] bg-blue-600 rounded-r-3xl shadow-2xl z-50 flex flex-col items-center py-6 gap-2 border-r border-blue-700 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        style={{ willChange: "transform" }}
+      >
         <div className="mb-8">
           <span className="material-icons text-3xl text-white">all_inclusive</span>
         </div>
@@ -56,8 +114,8 @@ export default function MobileTabBar() {
                   >
                     <span className="material-icons text-2xl">{item.icon}</span>
                   </button>
-                  {/* For accessibility, ensure only one dropdown is open at a time */}
-                  {openDropdown === item.label && (
+                  {/* Popover submenú */}
+                  {openDropdown === item.label && sidebarOpen && (
                     <div className="fixed top-0 left-[72px] h-full w-[220px] bg-white rounded-r-3xl shadow-2xl border-l z-50 flex flex-col py-8 px-4 animate-fadeIn">
                       <button className="absolute top-4 right-4 text-gray-400 hover:text-blue-600" onClick={() => setOpenDropdown(null)}>
                         <span className="material-icons">close</span>
@@ -68,27 +126,10 @@ export default function MobileTabBar() {
                             key={child.href}
                             href={child.href}
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${pathname.startsWith(child.href) ? "bg-blue-100 text-blue-700" : "text-blue-900 hover:bg-blue-50"}`}
-                            onClick={() => setOpenDropdown(null)}
-                          >
-                            <span className="material-icons text-xl">{child.icon}</span>
-                            {child.label}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {openDropdown === item.label && (
-                    <div className="fixed top-0 left-[72px] h-full w-[220px] bg-white rounded-r-3xl shadow-2xl border-l z-50 flex flex-col py-8 px-4 animate-fadeIn">
-                      <button className="absolute top-4 right-4 text-gray-400 hover:text-blue-600" onClick={() => setOpenDropdown(null)}>
-                        <span className="material-icons">close</span>
-                      </button>
-                      <div className="flex flex-col gap-2 mt-8">
-                        {item.children.map((child) => (
-                          <Link
-                            key={child.href}
-                            href={child.href}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${pathname.startsWith(child.href) ? "bg-blue-100 text-blue-700" : "text-blue-900 hover:bg-blue-50"}`}
-                            onClick={() => setOpenDropdown(null)}
+                            onClick={() => {
+                              setOpenDropdown(null);
+                              setSidebarOpen(false);
+                            }}
                           >
                             <span className="material-icons text-xl">{child.icon}</span>
                             {child.label}
@@ -102,6 +143,7 @@ export default function MobileTabBar() {
                 <Link
                   href={item.href}
                   className={`flex flex-col items-center w-full py-2 rounded-xl transition-colors ${pathname.startsWith(item.href) ? "bg-blue-100 text-blue-700" : "text-blue-100 hover:bg-blue-500/40"}`}
+                  onClick={() => setSidebarOpen(false)}
                 >
                   <span className="material-icons text-2xl">{item.icon}</span>
                 </Link>
@@ -127,5 +169,3 @@ export default function MobileTabBar() {
     </>
   );
 }
-
-// Elimina cualquier rastro del antiguo navbar inferior si existe en tu layout principal, _app.js, o layouts relacionados. Si el antiguo navbar era un componente o estaba en otro archivo, asegúrate de eliminar su importación y uso para que solo quede este sidebar azul en mobile.
