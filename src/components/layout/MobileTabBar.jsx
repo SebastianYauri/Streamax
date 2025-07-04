@@ -49,11 +49,34 @@ export default function MobileTabBar() {
               {item.children ? (
                 <>
                   <button
-                    className={`flex flex-col items-center w-full py-2 rounded-xl transition-colors focus:outline-none ${openDropdown === item.label ? "bg-blue-100 text-blue-700" : pathname.startsWith(item.href || "") ? "bg-blue-200 text-blue-800" : "text-blue-100 hover:bg-blue-500/40"}`}
+                    className={`flex flex-col items-center w-full py-2 rounded-xl transition-colors focus:outline-none ${openDropdown === item.label ? "bg-blue-100 text-blue-700" : "text-blue-100 hover:bg-blue-500/40"}`}
                     onClick={() => setOpenDropdown(openDropdown === item.label ? null : item.label)}
+                    aria-pressed={openDropdown === item.label}
+                    tabIndex={0}
                   >
                     <span className="material-icons text-2xl">{item.icon}</span>
                   </button>
+                  {/* For accessibility, ensure only one dropdown is open at a time */}
+                  {openDropdown === item.label && (
+                    <div className="fixed top-0 left-[72px] h-full w-[220px] bg-white rounded-r-3xl shadow-2xl border-l z-50 flex flex-col py-8 px-4 animate-fadeIn">
+                      <button className="absolute top-4 right-4 text-gray-400 hover:text-blue-600" onClick={() => setOpenDropdown(null)}>
+                        <span className="material-icons">close</span>
+                      </button>
+                      <div className="flex flex-col gap-2 mt-8">
+                        {item.children.map((child) => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${pathname.startsWith(child.href) ? "bg-blue-100 text-blue-700" : "text-blue-900 hover:bg-blue-50"}`}
+                            onClick={() => setOpenDropdown(null)}
+                          >
+                            <span className="material-icons text-xl">{child.icon}</span>
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {openDropdown === item.label && (
                     <div className="fixed top-0 left-[72px] h-full w-[220px] bg-white rounded-r-3xl shadow-2xl border-l z-50 flex flex-col py-8 px-4 animate-fadeIn">
                       <button className="absolute top-4 right-4 text-gray-400 hover:text-blue-600" onClick={() => setOpenDropdown(null)}>
