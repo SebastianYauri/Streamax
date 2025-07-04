@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useKardex } from "../hooks/useKardex";
+import { useKardex } from "../../hooks/useKardex";
 
 export default function KardexMovimientos() {
   const { kardex } = useKardex();

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import BarcodeScanner from "../BarcodeScanner";
+import BarcodeScanner from "../ui/BarcodeScanner";
 
 // TODO: Reemplazar initialProductos por datos obtenidos desde la API
 // Simulación de datos iniciales (puedes reemplazar por fetch a una API o contexto)

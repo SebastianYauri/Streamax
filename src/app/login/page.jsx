@@ -39,7 +39,7 @@ export default function LoginPage() {
           {/* Logo arriba de Login */}
           <div className="mb-8 flex flex-col items-center justify-center">
             <Image
-              src="/logo.svg"
+              src="/icons/logo.svg"
               alt="Logo"
               width={600}
               height={600}

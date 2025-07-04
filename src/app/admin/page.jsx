@@ -3,9 +3,9 @@
 import React, { useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
-import InventarioProductos from "../../components/InventarioProductos";
-import KardexMovimientos from "../../components/KardexMovimientos";
-import MobileTabBar from "../../components/MobileTabBar";
+import InventarioProductos from "../../components/inventario/InventarioProductos";
+import KardexMovimientos from "../../components/kardex/KardexMovimientos";
+import MobileTabBar from "../../components/layout/MobileTabBar";
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -24,11 +24,11 @@ export default function AdminPage() {
       {/* Header */}
       <header className="flex items-center justify-between mb-8">
         <div></div>
-        <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
+        <img src="/icons/logo.svg" alt="Logo" className="h-8 w-8" />
       </header>
       {/* Bienvenida */}
       <section className="bg-gradient-to-r from-blue-500 to-blue-400 rounded-xl p-8 mb-8 flex items-center gap-6 shadow">
-        <img src="/logo.svg" alt="Logo" className="h-20 w-20 rounded-full bg-white p-2 shadow" />
+        <img src="/icons/logo.svg" alt="Logo" className="h-20 w-20 rounded-full bg-white p-2 shadow" />
         <div>
           <h1 className="text-4xl font-extrabold text-white mb-2">Bienvenido al Sistema de Inventario</h1>
           <p className="text-white/90 text-lg">Gestiona tu inventario de manera eficiente y profesional</p>

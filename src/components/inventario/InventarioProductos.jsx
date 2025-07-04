@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useProductos } from "../hooks/useProductos";
+import { useProductos } from "../../hooks/useProductos";
 
 export default function InventarioProductos() {
   const { productos } = useProductos();

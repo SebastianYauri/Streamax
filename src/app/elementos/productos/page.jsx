@@ -1,6 +1,6 @@
 "use client";
 import InventarioCRUD from "../../../components/crud/InventarioCRUD";
-import BarcodeScanner from "../../../components/BarcodeScanner";
+import BarcodeScanner from "../../../components/ui/BarcodeScanner";
 import { useAuth } from "../../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

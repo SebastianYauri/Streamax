@@ -1,9 +1,8 @@
-
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: "dashboard" },
@@ -86,7 +85,7 @@ export default function Navbar() {
         style={{ maxWidth: "100vw", overflowY: 'auto' }}
       >
         <div className="flex items-center gap-2 mb-8 px-2">
-          <img src="/logo.svg" alt="Logo" className="h-9 w-9" />
+          <img src="/icons/logo.svg" alt="Logo" className="h-9 w-9" />
           <span className="font-bold text-lg tracking-wide">Inventario</span>
         </div>
         <ul className="flex-1 flex flex-col gap-1">
