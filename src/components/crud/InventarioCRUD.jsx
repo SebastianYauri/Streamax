@@ -51,6 +51,40 @@ const useProductosAPI = () => {
 
 // Permite pasar un callback para setear la serie desde fuera (ej: escáner)
 export default function InventarioCRUD({ onScanSerie }) {
+  // Lista de marcas para el select
+  const [marcas, setMarcas] = useState([]);
+
+  // Cargar modelos, categorías y marcas al montar
+  useEffect(() => {
+    fetch('/api/modelos/listar')
+      .then(res => res.json())
+      .then(data => setModelos(Array.isArray(data) ? data : []))
+      .catch(() => setModelos([]));
+    fetch('/api/categorias/listar')
+      .then(res => res.json())
+      .then(data => setCategorias(Array.isArray(data) ? data : []))
+      .catch(() => setCategorias([]));
+    fetch('/api/marcas/listar')
+      .then(res => res.json())
+      .then(data => setMarcas(Array.isArray(data) ? data : []))
+      .catch(() => setMarcas([]));
+  }, []);
+  // Listas para selects de modelos y categorías
+  const [modelos, setModelos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+
+  // Cargar modelos y categorías al montar
+  useEffect(() => {
+    // Cambia las rutas según tu backend
+    fetch('/api/modelos/listar')
+      .then(res => res.json())
+      .then(data => setModelos(Array.isArray(data) ? data : []))
+      .catch(() => setModelos([]));
+    fetch('/api/categorias/listar')
+      .then(res => res.json())
+      .then(data => setCategorias(Array.isArray(data) ? data : []))
+      .catch(() => setCategorias([]));
+  }, []);
   // Usa la API real para obtener productos
   const { productos, loading, error, refetch } = useProductosAPI();
   const [form, setForm] = useState({
@@ -64,7 +98,20 @@ export default function InventarioCRUD({ onScanSerie }) {
 
   // Handlers
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // Si cambia el modelo, actualizar también la marca automáticamente
+    if (name === 'ID_Modelo') {
+      const modeloSel = modelos.find(m => String(m.id || m.ID_Modelo) === String(value));
+      let idMarca = '';
+      if (modeloSel && (modeloSel.marca || modeloSel.ID_Marca || modeloSel.id_marca)) {
+        // Buscar la marca por id si existe
+        const marcaId = modeloSel.marca?.id || modeloSel.ID_Marca || modeloSel.id_marca;
+        idMarca = marcas.find(mk => String(mk.id || mk.ID_Marca) === String(marcaId))?.id || marcaId || '';
+      }
+      setForm(f => ({ ...f, [name]: value, ID_Marca: idMarca }));
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   // Guardar producto vía API real
@@ -89,7 +136,20 @@ export default function InventarioCRUD({ onScanSerie }) {
           body: JSON.stringify(payload)
         });
         const text = await res.text();
-        if (!res.ok) throw new Error(text);
+        if (!res.ok) {
+          // Depuración avanzada: mostrar status, headers y cuerpo
+          let errorInfo = `\nStatus: ${res.status} ${res.statusText}`;
+          errorInfo += `\nHeaders: ` + JSON.stringify(Object.fromEntries(res.headers.entries()));
+          try {
+            const json = JSON.parse(text);
+            errorInfo += `\nBody (JSON): ` + JSON.stringify(json);
+          } catch {
+            errorInfo += `\nBody (text): ` + text;
+          }
+          console.error('Error al guardar producto:', errorInfo);
+          alert('Error al guardar producto (ver consola para detalles): ' + errorInfo);
+          return;
+        }
         let data;
         try {
           data = JSON.parse(text);
@@ -100,13 +160,22 @@ export default function InventarioCRUD({ onScanSerie }) {
         setForm({ Serie: "", ID_Modelo: "", ID_Categoria: "", Estado: "" });
         setModalOpen(false);
       } catch (err) {
-        alert('Error al guardar producto: ' + err.message);
+        console.error('Error inesperado al guardar producto:', err);
+        alert('Error inesperado al guardar producto: ' + err.message);
       }
     }
   };
 
   const handleEdit = (idx) => {
-    setForm(productos[idx]);
+    // Mapear los datos del producto a los valores de los selects
+    const prod = productos[idx];
+    setForm({
+      Serie: prod.Serie || '',
+      ID_Modelo: modelos.find(m => (m.descripcion === prod.ID_Modelo || m.id === prod.ID_Modelo || m.ID_Modelo === prod.ID_Modelo))?.id || prod.ID_Modelo || '',
+      ID_Marca: marcas.find(mk => (mk.nombre === prod.Marca || mk.id === prod.Marca || mk.ID_Marca === prod.Marca))?.id || prod.Marca || '',
+      ID_Categoria: categorias.find(c => (c.nombre === prod.ID_Categoria || c.id_categoria === prod.ID_Categoria || c.ID_Categoria === prod.ID_Categoria))?.id_categoria || prod.ID_Categoria || '',
+      Estado: prod.Estado || ''
+    });
     setEditIndex(idx);
     setModalOpen(true);
   };
@@ -191,30 +260,60 @@ export default function InventarioCRUD({ onScanSerie }) {
                 className="border rounded px-3 py-2"
                 required
               />
-              <input
+              <select
                 name="ID_Modelo"
                 value={form.ID_Modelo}
                 onChange={handleChange}
-                placeholder="ID Modelo"
                 className="border rounded px-3 py-2"
                 required
-              />
-              <input
+              >
+                <option value="">Selecciona un modelo</option>
+                {modelos.map((m) => (
+                  <option key={m.id || m.ID_Modelo} value={m.id || m.ID_Modelo}>
+                    {m.descripcion || m.nombre || m.ID_Modelo}
+                  </option>
+                ))}
+              </select>
+              <select
+                name="ID_Marca"
+                value={form.ID_Marca || ''}
+                onChange={handleChange}
+                className="border rounded px-3 py-2"
+                required
+              >
+                <option value="">Selecciona una marca</option>
+                {marcas.map((marca) => (
+                  <option key={marca.id || marca.ID_Marca} value={marca.id || marca.ID_Marca}>
+                    {marca.nombre || marca.ID_Marca}
+                  </option>
+                ))}
+              </select>
+              <select
                 name="ID_Categoria"
                 value={form.ID_Categoria}
                 onChange={handleChange}
-                placeholder="ID Categoría"
                 className="border rounded px-3 py-2"
                 required
-              />
-              <input
+              >
+                <option value="">Selecciona una categoría</option>
+                {categorias.map((c) => (
+                  <option key={c.id_categoria || c.ID_Categoria} value={c.id_categoria || c.ID_Categoria}>
+                    {c.nombre || c.descripcion || c.ID_Categoria}
+                  </option>
+                ))}
+              </select>
+              <select
                 name="Estado"
                 value={form.Estado}
                 onChange={handleChange}
-                placeholder="Estado"
                 className="border rounded px-3 py-2"
                 required
-              />
+              >
+                <option value="">Selecciona un estado</option>
+                <option value="Nuevo">Nuevo</option>
+                <option value="Asignado">Asignado</option>
+                <option value="De baja">De baja</option>
+              </select>
               <button
                 type="submit"
                 className="col-span-1 md:col-span-2 bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 mt-2 transition"
