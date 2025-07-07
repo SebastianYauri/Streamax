@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useCrudApi } from "../../hooks/useCrudApi";
 
 export default function AccesoriosCRUD() {
-  const { data: accesorios, loading, error, create, update, remove } = useCrudApi({
+  const { data: accesoriosRaw, loading, error, create, update, remove } = useCrudApi({
     baseUrl: "/api/accesorios",
     adaptIn: (row) => ({
       id: row.id || row.id_accesorio || row.ID_Accesorio,
@@ -11,17 +11,26 @@ export default function AccesoriosCRUD() {
       Nombre: row.nombre || row.Nombre,
       Descripcion: row.descripcion || row.Descripcion,
       Cantidad: row.cantidad || row.Cantidad,
+      _raw: row,
     }),
     adaptOut: (form) => ({
       id: form.id,
-      id_categoria: form.ID_Categoria,
+      id_categoria: parseInt(form.ID_Categoria, 10),
       nombre: form.Nombre,
       descripcion: form.Descripcion,
       cantidad: form.Cantidad,
     }),
   });
 
+  // Join manual para accesorios con categoria null
   const [categorias, setCategorias] = useState([]);
+  const accesorios = accesoriosRaw.map(a => {
+    if (!a.CategoriaNombre && categorias.length > 0) {
+      const cat = categorias.find(c => String(c.id_categoria) === String(a.ID_Categoria));
+      return cat ? { ...a, CategoriaNombre: cat.nombre } : a;
+    }
+    return a;
+  });
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ ID_Categoria: "", Nombre: "", Descripcion: "", Cantidad: 0 });
   const [editIndex, setEditIndex] = useState(null);
@@ -95,9 +104,13 @@ export default function AccesoriosCRUD() {
                 required
               >
                 <option value="">Selecciona categoría</option>
-                {categorias.map((c) => (
-                  <option key={c.id_categoria || c.ID_Categoria || c.id} value={c.id_categoria || c.ID_Categoria || c.id}>{c.nombre || c.Nombre}</option>
-                ))}
+                {categorias && categorias.length > 0 ? (
+                  categorias.map((c) => (
+                    <option key={c.id_categoria} value={c.id_categoria}>{c.nombre}</option>
+                  ))
+                ) : (
+                  <option value="" disabled>Cargando categorías...</option>
+                )}
               </select>
               <input
                 name="Nombre"
@@ -146,31 +159,34 @@ export default function AccesoriosCRUD() {
           </tr>
         </thead>
         <tbody>
-          {accesorios.map((a, idx) => (
-            <tr key={idx} className="border-b">
-              <td className="px-4 py-2">{a.CategoriaNombre || categorias.find(c => (c.id_categoria || c.ID_Categoria || c.id) === a.ID_Categoria)?.nombre || a.ID_Categoria}</td>
-              <td className="px-4 py-2">{a.Nombre}</td>
-              <td className="px-4 py-2">{a.Descripcion}</td>
-              <td className="px-4 py-2">{a.Cantidad}</td>
-              <td className="px-4 py-2 flex gap-2">
-                <button
-                  className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded transition"
-                  onClick={() => handleEdit(idx)}
-                  type="button"
-                >
-                  Editar
-                </button>
-                <button
-                  className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded transition"
-                  onClick={() => handleDelete(idx)}
-                  type="button"
-                  disabled={loading}
-                >
-                  Eliminar
-                </button>
-              </td>
-            </tr>
-          ))}
+          {accesorios.map((a, idx) => {
+            const cat = categorias.find(c => String(c.id_categoria) === String(a.ID_Categoria));
+            return (
+              <tr key={idx} className="border-b">
+                <td className="px-4 py-2">{a.CategoriaNombre || cat?.nombre || '-'}</td>
+                <td className="px-4 py-2">{a.Nombre}</td>
+                <td className="px-4 py-2">{a.Descripcion}</td>
+                <td className="px-4 py-2">{a.Cantidad}</td>
+                <td className="px-4 py-2 flex gap-2">
+                  <button
+                    className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded transition"
+                    onClick={() => handleEdit(idx)}
+                    type="button"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded transition"
+                    onClick={() => handleDelete(idx)}
+                    type="button"
+                    disabled={loading}
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       <style jsx>{`

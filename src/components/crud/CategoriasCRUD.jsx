@@ -1,12 +1,25 @@
 "use client";
 import React, { useState } from "react";
 
-// TODO: Reemplazar initialCategorias y lógica local por datos y operaciones de la API
-const initialCategorias = [];
+
+import { useCrudApi } from "../../hooks/useCrudApi";
 
 export default function CategoriasCRUD() {
-  const [categorias, setCategorias] = useState(initialCategorias);
-  const [form, setForm] = useState({ nombre: "" });
+  const { data: categorias, loading, error, create, update, remove } = useCrudApi({
+    baseUrl: "/api/categorias",
+    adaptIn: (row) => ({
+      id: row.id_categoria,
+      nombre: row.nombre,
+      descripcion: row.descripcion,
+    }),
+    adaptOut: (form) => ({
+      id_categoria: form.id,
+      nombre: form.nombre,
+      descripcion: form.descripcion,
+    }),
+  });
+
+  const [form, setForm] = useState({ nombre: "", descripcion: "" });
   const [editIndex, setEditIndex] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -14,17 +27,15 @@ export default function CategoriasCRUD() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleAdd = (e) => {
+  const handleAddOrEdit = async (e) => {
     e.preventDefault();
     if (editIndex !== null) {
-      const updated = [...categorias];
-      updated[editIndex] = form;
-      setCategorias(updated);
-      setEditIndex(null);
+      await update(categorias[editIndex].id, form);
     } else {
-      setCategorias([...categorias, form]);
+      await create(form);
     }
-    setForm({ nombre: "" });
+    setForm({ nombre: "", descripcion: "" });
+    setEditIndex(null);
     setModalOpen(false);
   };
 
@@ -34,23 +45,21 @@ export default function CategoriasCRUD() {
     setModalOpen(true);
   };
 
-  const handleDelete = (idx) => {
-    setCategorias(categorias.filter((_, i) => i !== idx));
-    if (editIndex === idx) {
-      setForm({ nombre: "" });
-      setEditIndex(null);
-    }
+  const handleDelete = async (idx) => {
+    await remove(categorias[idx].id);
+    setForm({ nombre: "", descripcion: "" });
+    setEditIndex(null);
   };
 
   const handleOpenModal = () => {
-    setForm({ nombre: "" });
+    setForm({ nombre: "", descripcion: "" });
     setEditIndex(null);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
-    setForm({ nombre: "" });
+    setForm({ nombre: "", descripcion: "" });
     setEditIndex(null);
   };
 
@@ -80,12 +89,20 @@ export default function CategoriasCRUD() {
             <h3 className="text-xl font-semibold mb-4">
               {editIndex !== null ? "Editar Categoría" : "Agregar Categoría"}
             </h3>
-            <form className="flex flex-col gap-4" onSubmit={handleAdd}>
+            <form className="flex flex-col gap-4" onSubmit={handleAddOrEdit}>
               <input
                 name="nombre"
                 value={form.nombre}
                 onChange={handleChange}
                 placeholder="Nombre de la categoría"
+                className="border rounded px-3 py-2 flex-1"
+                required
+              />
+              <input
+                name="descripcion"
+                value={form.descripcion}
+                onChange={handleChange}
+                placeholder="Descripción"
                 className="border rounded px-3 py-2 flex-1"
                 required
               />
@@ -101,6 +118,7 @@ export default function CategoriasCRUD() {
         <thead>
           <tr className="bg-slate-100">
             <th className="px-4 py-2 text-left">Nombre</th>
+            <th className="px-4 py-2 text-left">Descripción</th>
             <th className="px-4 py-2 text-left">Acciones</th>
           </tr>
         </thead>
@@ -108,6 +126,7 @@ export default function CategoriasCRUD() {
           {categorias.map((cat, idx) => (
             <tr key={idx} className="border-b">
               <td className="px-4 py-2">{cat.nombre}</td>
+              <td className="px-4 py-2">{cat.descripcion}</td>
               <td className="px-4 py-2">
                 <div className="flex flex-col gap-2 md:flex-row md:gap-2 w-full">
                   <button
