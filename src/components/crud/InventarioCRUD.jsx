@@ -118,11 +118,50 @@ export default function InventarioCRUD({ onScanSerie }) {
   const handleAdd = async (e) => {
     e.preventDefault();
     if (editIndex !== null) {
-      alert('La edición de productos aún no está implementada con la API.');
-      setEditIndex(null);
-    } else {
+      // --- EDICIÓN REAL ---
       try {
-        // Adaptar los campos al formato esperado por el backend (objetos modelo y categoria)
+        const productoEdit = productos[editIndex];
+        const id = productoEdit.Serie; // O el campo correcto de ID
+        const payload = {
+          id_producto: form.Serie,
+          estado: form.Estado,
+          modelo: { id: Number(form.ID_Modelo) },
+          categoria: { id_categoria: Number(form.ID_Categoria) }
+          // Agrega otros campos si tu backend los espera
+        };
+        console.log('Payload enviado a /productos/editar/' + id, payload);
+        const res = await fetch(`/api/productos/editar/${id}`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }
+        );
+        const text = await res.text();
+        if (!res.ok) {
+          let errorInfo = `\nStatus: ${res.status} ${res.statusText}`;
+          errorInfo += `\nHeaders: ` + JSON.stringify(Object.fromEntries(res.headers.entries()));
+          try {
+            const json = JSON.parse(text);
+            errorInfo += `\nBody (JSON): ` + JSON.stringify(json);
+          } catch {
+            errorInfo += `\nBody (text): ` + text;
+          }
+          console.error('Error al editar producto:', errorInfo);
+          alert('Error al editar producto (ver consola para detalles): ' + errorInfo);
+          return;
+        }
+        if (typeof refetch === 'function') refetch();
+        setForm({ Serie: "", ID_Modelo: "", ID_Categoria: "", Estado: "" });
+        setModalOpen(false);
+        setEditIndex(null);
+      } catch (err) {
+        alert('Error inesperado al editar producto: ' + err.message);
+        console.error('Error inesperado al editar producto:', err);
+      }
+    } else {
+      // ...alta (POST) como ya tienes...
+      try {
         const payload = {
           id_producto: form.Serie,
           estado: form.Estado,
@@ -137,7 +176,6 @@ export default function InventarioCRUD({ onScanSerie }) {
         });
         const text = await res.text();
         if (!res.ok) {
-          // Depuración avanzada: mostrar status, headers y cuerpo
           let errorInfo = `\nStatus: ${res.status} ${res.statusText}`;
           errorInfo += `\nHeaders: ` + JSON.stringify(Object.fromEntries(res.headers.entries()));
           try {
