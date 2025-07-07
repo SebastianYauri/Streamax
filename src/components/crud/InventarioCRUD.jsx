@@ -224,8 +224,8 @@ export default function InventarioCRUD({ onScanSerie }) {
     if (!producto || !producto.Serie) return;
     if (!window.confirm('¿Seguro que deseas eliminar este producto?')) return;
     try {
-      // Suponiendo que tu backend acepta DELETE por Serie
-      const res = await fetch(`/api/productos/eliminar?serie=${encodeURIComponent(producto.Serie)}`, {
+      // Suponiendo que tu backend acepta DELETE por Serie en la ruta RESTful
+      const res = await fetch(`/api/productos/eliminar/${encodeURIComponent(producto.Serie)}`, {
         method: 'DELETE'
       });
       if (!res.ok) throw new Error(await res.text());

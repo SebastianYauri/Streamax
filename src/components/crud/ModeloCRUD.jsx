@@ -1,23 +1,46 @@
-"use client";
+
 import React, { useState } from "react";
 
-export default function ModeloCRUD({ modelos = [], marcas = [], onAdd, onEdit, onDelete }) {
+import { useCrudApi } from "../../hooks/useCrudApi";
+
+export default function ModeloCRUD() {
+  const { data: modelos, loading, error, create, update, remove } = useCrudApi({
+    baseUrl: "/api/modelos",
+    adaptIn: (row) => ({
+      id: row.id,
+      Descripcion: row.descripcion || row.Descripcion,
+      ID_Marca: row.marca?.id || row.ID_Marca
+    }),
+    adaptOut: (form) => ({
+      id: form.id,
+      descripcion: form.Descripcion,
+      id_marca: form.ID_Marca
+    }),
+  });
+  const [marcas, setMarcas] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ Descripcion: "", ID_Marca: "" });
   const [editIndex, setEditIndex] = useState(null);
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
 
-  const handleSubmit = (e) => {
+  React.useEffect(() => {
+    fetch('/api/marcas/listar')
+      .then(res => res.json())
+      .then(data => setMarcas(Array.isArray(data) ? data : []))
+      .catch(() => setMarcas([]));
+  }, []);
+
+  const handleAddOrEdit = async (e) => {
     e.preventDefault();
     if (!form.Descripcion || !form.ID_Marca) {
-      setError("Todos los campos son obligatorios");
+      setFormError("Todos los campos son obligatorios");
       return;
     }
-    setError("");
+    setFormError("");
     if (editIndex !== null) {
-      onEdit(editIndex, form);
+      await update(modelos[editIndex].id, form);
     } else {
-      onAdd(form);
+      await create(form);
     }
     setForm({ Descripcion: "", ID_Marca: "" });
     setEditIndex(null);
@@ -30,8 +53,8 @@ export default function ModeloCRUD({ modelos = [], marcas = [], onAdd, onEdit, o
     setModalOpen(true);
   };
 
-  const handleDelete = (idx) => {
-    onDelete(idx);
+  const handleDelete = async (idx) => {
+    await remove(modelos[idx].id);
     setEditIndex(null);
   };
 
@@ -59,7 +82,7 @@ export default function ModeloCRUD({ modelos = [], marcas = [], onAdd, onEdit, o
             <h3 className="text-xl font-semibold mb-4">
               {editIndex !== null ? "Editar Modelo" : "Agregar Modelo"}
             </h3>
-            <form className="grid grid-cols-1 gap-4" onSubmit={handleSubmit}>
+            <form className="grid grid-cols-1 gap-4" onSubmit={handleAddOrEdit}>
               <input
                 name="Descripcion"
                 value={form.Descripcion}
@@ -77,13 +100,14 @@ export default function ModeloCRUD({ modelos = [], marcas = [], onAdd, onEdit, o
               >
                 <option value="">Selecciona marca</option>
                 {marcas.map((m) => (
-                  <option key={m.ID_Marca} value={m.ID_Marca}>{m.Nombre}</option>
+                  <option key={m.id || m.ID_Marca} value={m.id || m.ID_Marca}>{m.nombre || m.Nombre}</option>
                 ))}
               </select>
-              {error && <div className="text-red-600">{error}</div>}
+              {formError && <div className="text-red-600">{formError}</div>}
               <button
                 type="submit"
                 className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 mt-2 transition"
+                disabled={loading}
               >
                 {editIndex !== null ? "Actualizar" : "Agregar"}
               </button>
@@ -101,11 +125,11 @@ export default function ModeloCRUD({ modelos = [], marcas = [], onAdd, onEdit, o
         </thead>
         <tbody>
           {modelos.map((modelo, idx) => {
-            const marca = marcas.find((m) => m.ID_Marca === modelo.ID_Marca);
+            const marca = marcas.find((m) => (m.id || m.ID_Marca) === modelo.ID_Marca);
             return (
               <tr key={idx} className="border-b">
                 <td className="px-4 py-2">{modelo.Descripcion}</td>
-                <td className="px-4 py-2">{marca ? marca.Nombre : ""}</td>
+                <td className="px-4 py-2">{marca ? (marca.nombre || marca.Nombre) : ""}</td>
                 <td className="px-4 py-2 flex gap-2">
                   <button
                     className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded transition"
@@ -118,6 +142,7 @@ export default function ModeloCRUD({ modelos = [], marcas = [], onAdd, onEdit, o
                     className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded transition"
                     onClick={() => handleDelete(idx)}
                     type="button"
+                    disabled={loading}
                   >
                     Eliminar
                   </button>
