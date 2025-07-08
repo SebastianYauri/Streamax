@@ -1,8 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import BarcodeScanner from "../ui/BarcodeScanner";
-
-import { useEffect } from "react";
+import ProductoForm from "./ProductoForm";
 
 // Hook para obtener productos desde la API real
 const useProductosAPI = () => {
@@ -51,40 +50,58 @@ const useProductosAPI = () => {
 
 // Permite pasar un callback para setear la serie desde fuera (ej: escáner)
 export default function InventarioCRUD({ onScanSerie }) {
-  // Lista de marcas para el select
-  const [marcas, setMarcas] = useState([]);
-
-  // Cargar modelos, categorías y marcas al montar
-  useEffect(() => {
-    fetch('/api/modelos/listar')
-      .then(res => res.json())
-      .then(data => setModelos(Array.isArray(data) ? data : []))
-      .catch(() => setModelos([]));
-    fetch('/api/categorias/listar')
-      .then(res => res.json())
-      .then(data => setCategorias(Array.isArray(data) ? data : []))
-      .catch(() => setCategorias([]));
-    fetch('/api/marcas/listar')
-      .then(res => res.json())
-      .then(data => setMarcas(Array.isArray(data) ? data : []))
-      .catch(() => setMarcas([]));
-  }, []);
-  // Listas para selects de modelos y categorías
+  // Listas para selects de modelos, marcas y categorías
   const [modelos, setModelos] = useState([]);
+  const [marcas, setMarcas] = useState([]);
   const [categorias, setCategorias] = useState([]);
 
-  // Cargar modelos y categorías al montar
+  // Cargar modelos, marcas y categorías al montar
+  const fetchModelos = async () => {
+    const res = await fetch('/api/modelos/listar');
+    const data = await res.json();
+    setModelos(Array.isArray(data) ? data : []);
+  };
+  const fetchMarcas = async () => {
+    const res = await fetch('/api/marcas/listar');
+    const data = await res.json();
+    setMarcas(Array.isArray(data) ? data : []);
+  };
+  const fetchCategorias = async () => {
+    const res = await fetch('/api/categorias/listar');
+    const data = await res.json();
+    setCategorias(Array.isArray(data) ? data : []);
+  };
   useEffect(() => {
-    // Cambia las rutas según tu backend
-    fetch('/api/modelos/listar')
-      .then(res => res.json())
-      .then(data => setModelos(Array.isArray(data) ? data : []))
-      .catch(() => setModelos([]));
-    fetch('/api/categorias/listar')
-      .then(res => res.json())
-      .then(data => setCategorias(Array.isArray(data) ? data : []))
-      .catch(() => setCategorias([]));
+    fetchModelos();
+    fetchMarcas();
+    fetchCategorias();
   }, []);
+
+  // Funciones para agregar y refrescar
+  const handleAddMarca = async (data) => {
+    await fetch('/api/marcas/guardar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    await fetchMarcas();
+  };
+  const handleAddModelo = async (data) => {
+    await fetch('/api/modelos/guardar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    await fetchModelos();
+  };
+  const handleAddCategoria = async (data) => {
+    await fetch('/api/categorias/guardar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    await fetchCategorias();
+  };
   // Usa la API real para obtener productos
   const { productos, loading, error, refetch } = useProductosAPI();
   const [form, setForm] = useState({
@@ -115,19 +132,20 @@ export default function InventarioCRUD({ onScanSerie }) {
   };
 
   // Guardar producto vía API real
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    if (editIndex !== null) {
+  const handleAdd = async (eOrData) => {
+    let isEvent = typeof eOrData?.preventDefault === "function";
+    if (isEvent) eOrData.preventDefault();
+    const dataLocal = isEvent ? form : eOrData;
+    if (editIndex !== null && isEvent) {
       // --- EDICIÓN REAL ---
       try {
         const productoEdit = productos[editIndex];
         const id = productoEdit.Serie; // O el campo correcto de ID
         const payload = {
-          id_producto: form.Serie,
-          estado: form.Estado,
-          modelo: { id: Number(form.ID_Modelo) },
-          categoria: { id_categoria: Number(form.ID_Categoria) }
-          // Agrega otros campos si tu backend los espera
+          id_producto: dataLocal.Serie,
+          estado: dataLocal.Estado,
+          modelo: { id: Number(dataLocal.ID_Modelo) },
+          categoria: { id_categoria: Number(dataLocal.ID_Categoria) }
         };
         console.log('Payload enviado a /productos/editar/' + id, payload);
         const res = await fetch(`/api/productos/editar/${id}`,
@@ -163,10 +181,10 @@ export default function InventarioCRUD({ onScanSerie }) {
       // ...alta (POST) como ya tienes...
       try {
         const payload = {
-          id_producto: form.Serie,
-          estado: form.Estado,
-          modelo: { id: Number(form.ID_Modelo) },
-          categoria: { id_categoria: Number(form.ID_Categoria) }
+          id_producto: dataLocal.Serie,
+          estado: dataLocal.Estado,
+          modelo: { id: Number(dataLocal.ID_Modelo) },
+          categoria: { id_categoria: Number(dataLocal.ID_Categoria) }
         };
         console.log('Payload enviado a /api/productos/guardar:', payload);
         const res = await fetch('/api/productos/guardar', {
@@ -289,76 +307,17 @@ export default function InventarioCRUD({ onScanSerie }) {
                 <BarcodeScanner onDetected={handleScanSerie} />
               </div>
             )}
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleAdd}>
-              <input
-                name="Serie"
-                value={form.Serie}
-                onChange={handleChange}
-                placeholder="Serie"
-                className="border rounded px-3 py-2"
-                required
-              />
-              <select
-                name="ID_Modelo"
-                value={form.ID_Modelo}
-                onChange={handleChange}
-                className="border rounded px-3 py-2"
-                required
-              >
-                <option value="">Selecciona un modelo</option>
-                {modelos.map((m) => (
-                  <option key={m.id || m.ID_Modelo} value={m.id || m.ID_Modelo}>
-                    {m.descripcion || m.nombre || m.ID_Modelo}
-                  </option>
-                ))}
-              </select>
-              <select
-                name="ID_Marca"
-                value={form.ID_Marca || ''}
-                onChange={handleChange}
-                className="border rounded px-3 py-2"
-                required
-              >
-                <option value="">Selecciona una marca</option>
-                {marcas.map((marca) => (
-                  <option key={marca.id || marca.ID_Marca} value={marca.id || marca.ID_Marca}>
-                    {marca.nombre || marca.ID_Marca}
-                  </option>
-                ))}
-              </select>
-              <select
-                name="ID_Categoria"
-                value={form.ID_Categoria}
-                onChange={handleChange}
-                className="border rounded px-3 py-2"
-                required
-              >
-                <option value="">Selecciona una categoría</option>
-                {categorias.map((c) => (
-                  <option key={c.id_categoria || c.ID_Categoria} value={c.id_categoria || c.ID_Categoria}>
-                    {c.nombre || c.descripcion || c.ID_Categoria}
-                  </option>
-                ))}
-              </select>
-              <select
-                name="Estado"
-                value={form.Estado}
-                onChange={handleChange}
-                className="border rounded px-3 py-2"
-                required
-              >
-                <option value="">Selecciona un estado</option>
-                <option value="Nuevo">Nuevo</option>
-                <option value="Asignado">Asignado</option>
-                <option value="De baja">De baja</option>
-              </select>
-              <button
-                type="submit"
-                className="col-span-1 md:col-span-2 bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 mt-2 transition"
-              >
-                {editIndex !== null ? "Actualizar" : "Agregar"}
-              </button>
-            </form>
+            <ProductoForm
+              initialData={form}
+              modelos={modelos}
+              marcas={marcas}
+              categorias={categorias}
+              onSubmit={handleAdd}
+              loading={loading}
+              onAddMarca={handleAddMarca}
+              onAddModelo={handleAddModelo}
+              onAddCategoria={handleAddCategoria}
+            />
           </div>
         </div>
       )}
